@@ -1,0 +1,90 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>LeetCode Recommendation Engine</h2>
+<p>Enter your LeetCode username and pick a goal. The system will analyze your solved problems and get AI recommendations.</p>
+
+{% if error %}
+<div class="alert alert-danger" role="alert">
+  {{ error }}
+</div>
+{% endif %}
+
+{% if not show_recent and not submitted %}
+<form method="post" class="mb-4">
+    {% csrf_token %}
+    <div class="row g-3">
+        <div class="col-md-6">{{ form.username.label_tag }}{{ form.username }}</div>
+        <div class="col-md-6">{{ form.goal.label_tag }}{{ form.goal }}</div>
+    </div>
+    <button type="submit" name="show_recent" class="btn btn-primary mt-3">Show Recent Problems</button>
+</form>
+{% endif %}
+
+{% if show_recent or submitted %}
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Recent Accepted Problems</h4>
+            <ul class="list-group">
+            {% for prob in recent_problems %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>{{ prob.title }}</strong><br>
+                        <small>{{ prob.difficulty }} | {{ prob.topics|join:', ' }}</small>
+                    </div>
+                    <a href="{{ prob.url }}" class="btn btn-sm btn-outline-secondary" target="_blank">Open</a>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h4>Analysis</h4>
+            <p><strong>Difficulty distribution:</strong></p>
+            <ul>
+                {% for key,value in analysis.difficulty_distribution.items %}
+                <li>{{ key }}: {{ value }}</li>
+                {% endfor %}
+            </ul>
+
+            <p><strong>Topic frequency:</strong></p>
+            <ul>
+                {% for topic,count in analysis.topic_frequency %}
+                <li>{{ topic }}: {{ count }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    {% if show_recent %}
+    <hr>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="username" value="{{ request.session.username }}" />
+        <input type="hidden" name="goal" value="{{ request.session.selected_goal }}" />
+        <button type="submit" name="get_recommendations" class="btn btn-success">Get AI Recommendations</button>
+    </form>
+    {% endif %}
+
+    {% if submitted %}
+    <hr>
+    <h4>AI Recommendations</h4>
+    <div class="row row-cols-1 row-cols-md-2 g-3">
+        {% for rec in recommendations %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ rec.name }}</h5>
+                    <p class="card-text">
+                        Difficulty: {{ rec.difficulty }}<br>
+                        Topic: {{ rec.topic }}
+                    </p>
+                    <p class="card-text"><em>{{ rec.reason }}</em></p>
+                    <a href="{{ rec.url }}" target="_blank" class="btn btn-sm btn-success">Open on LeetCode</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
