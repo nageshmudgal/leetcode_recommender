@@ -55,7 +55,7 @@ Return response as JSON array of objects with these keys: name, difficulty, topi
 """
 
     text = None
-    model_candidates = ['gemini-2.0-flash', 'gemini-flash-latest', 'gemini-pro-latest', 'gemini-2.5-flash']
+    model_candidates = ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-pro-latest', 'gemini-2.5-flash']
     for model_name in model_candidates:
         try:
             model = client.GenerativeModel(model_name)
